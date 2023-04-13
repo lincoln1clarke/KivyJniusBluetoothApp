@@ -1,0 +1,233 @@
+###:kivy
+
+<blankPage>:
+    BoxLayout:
+        Label:
+            text:''
+
+<welcomePage>:
+    okButton: okButton
+    
+    FloatLayout:
+        size: root.width, root.height
+        Label:
+            text:'Welcome!'
+            color: 0,1,0.6,1
+            font_size: 39
+            pos_hint: {'center_x':0.5, 'center_y':0.87}
+        Label:
+            text:'This app allows you to control your RC car through Bluetooth.\nYou can change the settings of the car on the next page.\nOn the control page, you can connect to your\nRoboRoller via Bluetooth and control it.\nIf you have any questions about the settings, see the info page.'
+            halign: 'center'
+            font_size: 21
+            pos_hint: {'center_x':0.5, 'center_y': 0.58}
+        Button:
+            id: okButton
+            text: 'Continue'
+            font_size: 26
+            size_hint: 0.2, 0.13
+            pos_hint: {'center_x':0.5, 'center_y':0.2}
+            on_press: root.okPressed()
+
+<infoPage>:
+    FloatLayout:
+        size: root.width, root.height
+        Label:
+            text:"Settings"
+            color: 0,1,0.6,1
+            font_size: 33
+            pos_hint:{'center_x':0.5, 'top':1.44}
+        Label:
+            text: "Max Speed:"
+            pos_hint: {'x':-0.32, 'top':1.28}
+        Label:
+            text:"Maximum speed the RoboRoller is limited to relative\nto it's absolute maximum (in percentage)."
+            halign: 'center'
+            pos_hint: {'x':0.15, 'top':1.28}
+        Label:
+            text: "Trim:"
+            pos_hint: {'x':-0.32, 'top':0.97+0.08}
+        Label:
+            text:"Compensates for the RoboRoller steering in\none direction more than the other.\nIf the robot is going veering left, move this slider towards the right,\nand vice versa."
+            halign: 'center'
+            pos_hint: {'x':0.15, 'top':0.97+0.08}
+        Label:
+            text: "Light On:"
+            pos_hint: {'x':-0.32, 'top':0.81}
+        Label:
+            text:"Dictates whether the headlight of the robot stays on while driving."
+            halign: 'center'
+            pos_hint: {'x':0.15, 'top':0.81}
+
+        GridLayout:
+            cols:2
+            size_hint: 1, 0.14
+            Button:
+                text:"Return to Control"
+                on_press: root.switchToControlPage()
+            Button:
+                text: "Adjust Settings"
+                on_press: root.switchToSettingsPage()
+
+<settingsPage>:
+    maxSpeedSlider: maxSpeedSlider
+    trimSlider: trimSlider
+    lightOn: lightOnButton
+    RelativeLayout:
+        size: root.width, root.height
+        ActionBar:
+            pos_hint: {'center_x':0.5, 'top':1}
+            size_hint: 1, 0.13
+            ActionView:
+                spacing: 0
+                ActionPrevious:
+                    title: "RoboRoller Control App"
+                    app_icon: "AppIcon.png"
+                    with_previous: False
+                ActionButton:
+                    icon: "InfoIcon.png"
+                    on_press: root.switchToInfoPage()
+                ActionButton:
+                    text: ""
+        GridLayout:
+            cols: 2
+            pos_hint: {'center_x':0.45, 'top':0.885}
+            size_hint_y: 0.79
+            Label:
+                text: 'Maximum speed:'
+            BoxLayout:
+                orientation: 'vertical'
+                Slider:
+                    id: maxSpeedSlider
+                    min: 15
+                    max: 100
+                    value: 70
+                    size_hint_y: 0.7
+                GridLayout:
+                    size_hint_y: 0.3
+                    rows:1
+                    Label:
+                        text: '15%'
+                    Label:
+                        text: 'Value: ' + str(int(maxSpeedSlider.value))
+                    Label:
+                        text: '100%'
+            Label:
+                text: 'Trim:'
+            BoxLayout:
+                orientation: 'vertical'
+                Slider:
+                    id: trimSlider
+                    min: -100
+                    max: 100
+                    value: 0
+                    size_hint_y: 0.7
+                GridLayout:
+                    size_hint_y: 0.3
+                    rows:1
+                    Label:
+                        text: 'Left'
+                    Button:
+                        text: 'Reset'
+                        on_press: root.resetTrim()
+                    Label:
+                        text: 'Right'
+            Label:
+                text: 'Light On:'
+            CheckBox:
+                id: lightOnButton
+                active: True
+        Label:
+            text: 'Value: ' + str(int(trimSlider.value))
+            pos_hint: {'center_x': 0.695, 'center_y':0.475}
+        Button:
+            size_hint:0.2, 0.12
+            pos_hint: {'center_x': 0.5, 'center_y':0.08}
+            text:'Save Settings'
+            on_press: root.saveButtonPressed()
+<controlPage>:
+    speedSlider: speedSlider
+    steeringSlider: steeringSlider
+    connectionMessage: connectionMessage
+    connectButton: connectButton
+
+    FloatLayout:
+        size: root.width, root.height
+        Image:
+            source: "ControlPageBackground.jpg"
+            size_hint: 1.3,1.3
+            pos_hint: {'center_x': 0.5, 'center_y':0.5}
+        Slider:
+            orientation: 'vertical'
+            id: speedSlider     
+            min: -100
+            max: 100
+            value: 0
+            size_hint_y: 0.6
+            pos_hint: {'center_x':0.2, 'center_y':(0.82/2)}
+            on_value: root.speedSliderValueUpdate()
+            on_touch_up: root.on_speed_slider_release(args[1], self)
+            on_touch_down: root.on_speedSlider_press(args[1], self)
+        Slider:
+            orientation: 'horizontal'
+            id: steeringSlider     
+            min: -100
+            max: 100
+            value: 0
+            size_hint_x: 0.5
+            pos_hint: {'center_x':0.7, 'center_y':(0.82/2)}
+            on_value: root.steerSliderValueUpdate()
+            on_touch_up: root.on_steer_slider_release(args[1], self)
+            on_touch_down: root.on_steerSlider_press(args[1], self)
+
+        Button:
+            background_normal: "Stop.png"
+            background_down: "Stop_down.png"
+            pos_hint: {'center_x':0.45, 'center_y':(0.14)}
+            size_hint: 0.225, 0.35
+            on_press: root.stop()
+
+        Label:
+            id: connectionMessage
+            text: ""
+            halign: 'center'
+            font_size: 40
+            pos_hint: {'center_x':0.5, 'center_y':0.73}
+
+        ActionBar:
+            size_hint_y: 0.18
+            pos_hint: {'center_x':0.5, 'top': 1}
+            ActionView:
+                spacing: 30
+                ActionPrevious:
+                    title:'RoboRoller Control App'
+                    app_icon: "AppIcon.png"
+                    with_previous: False
+                ActionButton:
+                    id: connectButton
+                    text: 'CONNECT'
+                    on_press: root.connectButtonPressed()
+                ActionButton:
+                    icon: "InfoIcon.png"
+                    on_press: root.infoButtonPressed()
+                ActionButton:
+                    icon: 'SettingsCog.png'
+                    on_press: root.settingsCogPressed()
+
+<connectionErrorPage>:
+    FloatLayout:
+        size: root.width, root.height
+        Label:
+            text:'ERROR...'
+            color: 1,0,0,1
+            font_size: 39
+            pos_hint: {'center_x':0.5, 'center_y':0.87}
+        Label:
+            text: "Your RoboRoller was not found.\nPlease make sure it is turned on and\nconnected to the device in Bluetooth settings."
+            halign: 'center'
+            font_size: 22
+            pos_hint: {'center_x':0.5, 'center_y':0.7}
+        Button:
+            text:"Ok"
+            size_hint: 0.3,0.15
+            pos_hint: {'center_x':0.5, 'center_y':0.3}
+            on_press: root.goBack()
